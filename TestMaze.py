@@ -7,6 +7,7 @@
 import numpy as np
 import pandas as pd
 import random
+from queue import PriorityQueue
 from collections import deque
 from copy import copy, deepcopy
 
@@ -19,9 +20,20 @@ class Node:
         self.x = x
         self.y = y
         self.parent = parent
- 
     def __repr__(self):
         return str((self.x, self.y))
+
+class ENode:
+    # (x, y) represents coordinates of a cell in matrix
+    # maintain a parent node for printing path
+    def __init__(self, x, y, parent, Distance):
+        self.x = x
+        self.y = y
+        self.parent = parent
+        self.Distance = Distance
+    def __repr__(self):
+        return str((self.x, self.y))
+
 
 row = [-1, 0, 0, 1]
 col = [0, -1, 1, 0]
@@ -85,7 +97,7 @@ b = (8,7)
 def advance_fire(curr_matrix):
     new_matrix = deepcopy(curr_matrix)
 
-dfsPath = []
+
 def DFSsearch(Coord1, Coord2, Matrix):
     stack = []
    
@@ -136,6 +148,49 @@ def DFSsearch(Coord1, Coord2, Matrix):
         stack.append((xPos, yPos - 1))
         
     return False
+
+
+def dist(x, y):
+    return(np.sqrt((x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2))
+
+def AStarSearch(Coord1, Coord2, Matrix):
+    PQ = PriorityQueue()
+
+    if (Matrix[Coord2[0]][Coord2[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '_') or (Matrix[Coord1[0]][Coord1[1]] == '_'):
+        return None
+
+    initialDistance = dist(Coord1, Coord2)
+    start = ENode(Coord1[0], Coord1[1], None, initialDistance)
+    
+    PQ.put((start.Distance, start))
+
+    while(PQ):
+        curr = PQ.get()
+        print(curr)
+        xPos = (curr[0])
+        yPos = (curr[1])
+
+
+        if ( xPos < 0  or xPos >= len(Matrix) or yPos < 0 or yPos >= len(Matrix[0])  or ((Matrix[curr.x][curr.y]) == '1') or ((Matrix[curr.x][curr.y]) == '_')):
+            continue
+
+        Matrix[xPos][yPos] = '1'
+
+        if (Matrix[Coord2[0]][Coord2[1]] == '!'):
+            return None
+
+        if (xPos == Coord2[0] and yPos == Coord2[1]):
+            return curr
+
+        for i in range(4):
+            x = xPos + row[i]
+            y = yPos + col[i]
+            next = ENode(x,y,curr, curr.Distance+1)
+            eDist = dist((next.x, next.y) , Coord2)
+            PQ.put(next.Distance + eDist, next)
+
+    return None
+
 
 def BFS(Coord1, Coord2, Matrix):
     q = deque()
@@ -212,7 +267,7 @@ def getPath(node,matrix):
     return temp
 #print(DFSsearch(a, b, testMatrix))
 
-temp = BFS(a,b,testMatrix)
+temp = AStarSearch(a,b,testMatrix)
 if temp: 
     print(testMatrix)
     print("Path: ")
@@ -220,6 +275,9 @@ if temp:
     print(l)
 else:
     print("no path")
+
+print(dist((2, -1), (-2,2)))
+
 
 
 
