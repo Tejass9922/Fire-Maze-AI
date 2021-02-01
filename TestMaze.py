@@ -53,7 +53,7 @@ def printMatrix(Matrix):
     
 
 
-testMatrix = createMatrix(10, .44)
+testMatrix = createMatrix(10, .24)
 bfsPathMatrix = deepcopy(testMatrix)
 printMatrix(testMatrix)
 '''
