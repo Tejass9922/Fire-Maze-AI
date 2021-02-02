@@ -43,7 +43,7 @@ class ENode:
 
 row = [-1, 0, 0, 1]
 col = [0, -1, 1, 0]
-q = .2
+q = .3
 
 def createMatrix(Dim, p):
     Matrix = [ [ 0 for i in range(Dim) ] for j in range(Dim) ]
