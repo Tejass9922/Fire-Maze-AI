@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
+#todo Strategy 1 : BFS / A*
+#     Strategy 2:  BFS / A*
+#     Strategy 3:  
 
 
 import numpy as np
@@ -41,6 +43,7 @@ class ENode:
 
 row = [-1, 0, 0, 1]
 col = [0, -1, 1, 0]
+q = .2
 
 def createMatrix(Dim, p):
     Matrix = [ [ 0 for i in range(Dim) ] for j in range(Dim) ]
@@ -76,36 +79,57 @@ astar_testMatrix = deepcopy(testMatrix)
 bfsPathMatrix = deepcopy(testMatrix)
 dfsPathMatrix = deepcopy(testMatrix)
 astarPathMatrix = deepcopy(testMatrix)
-
+strat1Matrix = deepcopy(testMatrix)
 #printMatrix(testMatrix)
-'''
-for i in range(len(testMatrix)):
-    for j in range(len(testMatrix[0])):
-        print(str(i) + "," + str(j), end = ' ')
-        
-    print("")
-'''
 
-#todo: Search Algos
-#Strategy
-#Fire (BFS Algo, Fringe (Queue)
+
+
 
 
 
 
 a = (0,0)
-b = (8,7)
+b = (9,9)
 
-'''def CoordinateCheck(Matrix, coordinate):
-    xPos = coordinate[0]
-    yPos = coordiante[1]
-    MatrixDim = len(Matrix)
-    
-    if ()
-    
-'''
+
+def onFire(x,y,grid):
+    k = 0
+    for i in range(4):
+        xp = x  + row[i]
+        yp = y  + col[i]
+        if (0 <= xp < len(grid)) and (0<= yp < len(grid)):
+            if grid[xp][yp] == '!':
+                k = k + 1
+    return k
+
 def advance_fire(curr_matrix):
-    new_matrix = deepcopy(curr_matrix)
+    new_grid = deepcopy(curr_matrix)
+    for i in range(len(curr_matrix)):
+        for j in range(len(curr_matrix[0])):
+            if (curr_matrix[i][j] != '!' and curr_matrix[i][j] != '_'):
+                k = onFire(i,j,curr_matrix) 
+                prob = 1 - pow((1-q),k)
+                if random.random() <= prob:
+                    new_grid[i][j] = '!'
+
+    return new_grid
+
+def strategy1(path, matrix):
+    counter = 0
+    for curr in path:
+        x = curr[0]
+        y = curr[1]
+        if matrix[x][y] == '!':
+            print("Path Failed, Maze burned")
+            return matrix
+        else:
+            matrix[x][y] = 'X'
+            matrix = advance_fire(matrix)
+        counter = counter + 1
+    
+    print("Successfully exited the maze")
+    print(counter)
+    return matrix
 
 dfsPath = []
 def DFSsearch(Coord1, Coord2, Matrix):
@@ -296,6 +320,18 @@ def getPath(node,matrix):
    
     print("")
     return temp
+
+def startFire(matrix):
+    randX = random.randint(0,len(matrix)-1)
+    randY = random.randint(0,len(matrix)-1)
+    while (matrix[randX][randY] != '0'):
+        randX = random.randint(0,len(matrix)-1)
+        randY = random.randint(0,len(matrix)-1)
+
+    matrix[randX][randY] = '!'
+    return matrix
+
+
 #print(DFSsearch(a, b, testMatrix))
 print(dfsTestMatrix)
 bfsTemp = BFS(a,b,testMatrix)
@@ -304,28 +340,43 @@ astarTemp = a_star(a,b,astar_testMatrix)
 '''
 if dfsTemp:
   
-    print("Path: ")
+    print("DFS Path: ")
     l = getPath(dfsTemp,dfsPathMatrix)
     print(l)
 else:
     print("no path")
-
+'''
 if bfsTemp: 
    
-    print("Path: ")
+    print("BFS Path: ")
     l = getPath(bfsTemp,bfsPathMatrix)
     print(l)
 else:
     print("no path")
 '''
 if astarTemp:
-    print("Path: ")
+    print("A* Path: ")
     l = getPath(astarTemp,astarPathMatrix)
     print(l)
 else:
     print("no path")
 
 print(heuristic(a,b))
+'''
+print("Trying Strategy 1---------------------------------------|")
+stack = []
+x = bfsTemp is not None 
+if x:
+    
+    while bfsTemp:
+        stack.append((bfsTemp.x,bfsTemp.y))
+        bfsTemp = bfsTemp.parent
 
+    prime_path = []
+    while stack:
+        prime_path.append(stack.pop())
+
+    strat1Matrix = startFire(strat1Matrix)
+    print(strategy1(prime_path,strat1Matrix))    
 
 
