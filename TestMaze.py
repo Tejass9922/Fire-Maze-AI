@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#todo Strategy 1 : BFS / A*
+#todo Strategy 1 : A*
 #     Strategy 2:  BFS / A*
 #     Strategy 3:  
 
