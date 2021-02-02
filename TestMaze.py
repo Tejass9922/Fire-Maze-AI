@@ -80,6 +80,7 @@ bfsPathMatrix = deepcopy(testMatrix)
 dfsPathMatrix = deepcopy(testMatrix)
 astarPathMatrix = deepcopy(testMatrix)
 strat1Matrix = deepcopy(testMatrix)
+strat2Matrix = deepcopy(testMatrix)
 #printMatrix(testMatrix)
 
 
@@ -113,6 +114,23 @@ def advance_fire(curr_matrix):
                     new_grid[i][j] = '!'
 
     return new_grid
+
+
+def runnerStrat(nodeTemp, Matrix):
+    stack = []
+    x = nodeTemp is not None 
+    if x:
+        while nodeTemp:
+            stack.append((bfsTemp.x,bfsTemp.y))
+            nodeTemp = nodeTemp.parent
+
+        prime_path = []
+        while stack:
+            prime_path.append(stack.pop())
+
+        Matrix = startFire(strat1Matrix)
+        
+        return prime_path
 
 def strategy1(path, matrix):
     counter = 0
@@ -189,6 +207,22 @@ def DFSsearch(Coord1, Coord2, Matrix):
         stack.append((xPos, yPos - 1))
         '''
     return None
+
+def strategy2(path, Matrix):
+    for x in path:
+        if (Matrix[x[0]][x[1]] == '!'):
+            print('Maze is Fucked! Youve reached fire!!!')
+            return Matrix
+        else:
+            Matrix = advance_fire(Matrix)
+            
+            Coord2 = (path[-1][0], path[-1][1])
+            AStarTemp = a_star(x, Coord2, Matrix)
+            path = runnerStrat(AStarTemp, Matrix)
+            print(path)
+            
+    print("Successfully exited the maze!")
+    return Matrix
 
 def BFS(Coord1, Coord2, Matrix):
     q = deque()
@@ -332,11 +366,21 @@ def startFire(matrix):
     return matrix
 
 
+
+
+
+
+
 #print(DFSsearch(a, b, testMatrix))
 print(dfsTestMatrix)
 bfsTemp = BFS(a,b,testMatrix)
 dfsTemp = DFSsearch(a,b,dfsTestMatrix)
 astarTemp = a_star(a,b,astar_testMatrix)
+
+
+
+
+
 '''
 if dfsTemp:
   
@@ -345,6 +389,7 @@ if dfsTemp:
     print(l)
 else:
     print("no path")
+'''
 '''
 if bfsTemp: 
    
@@ -360,10 +405,11 @@ if astarTemp:
     print(l)
 else:
     print("no path")
-
 print(heuristic(a,b))
-'''
+
+"""
 print("Trying Strategy 1---------------------------------------|")
+
 stack = []
 x = bfsTemp is not None 
 if x:
@@ -379,4 +425,29 @@ if x:
     strat1Matrix = startFire(strat1Matrix)
     print(strategy1(prime_path,strat1Matrix))    
 
+def strategy2(path):
+    run A* from the beginning node, 
+    find a path
+    from the top of the stack start popping nodes to reveal the path (Keep track of the previously popped node)
+    if a popped node is under fire
+        clear the stack
+        re run DFS from the prevoiusly popped node
+        populate the stack -> continue
+        'startover'
+"""
+print("Testing Strategy 2-------------------------------------|")
+stack = []
+x = astarTemp is not None 
+if x:
+    
+    while astarTemp:
+        stack.append((astarTemp.x,astarTemp.y))
+        astarTemp = astarTemp.parent
 
+    prime_path = []
+    while stack:
+        prime_path.append(stack.pop())
+
+    strat2Matrix = startFire(strat2Matrix)
+    print('e')
+    print(strategy2(prime_path,strat2Matrix))  
