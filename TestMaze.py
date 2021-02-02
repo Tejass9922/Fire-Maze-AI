@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#todo Strategy 1 : A*
+#todo Strategy 1 : BFS / A*
 #     Strategy 2:  BFS / A*
 #     Strategy 3:  
 
@@ -369,7 +369,7 @@ x = bfsTemp is not None
 if x:
     
     while bfsTemp:
-        stack.append((bfsTemp.y,bfsTemp.x))
+        stack.append((bfsTemp.x,bfsTemp.y))
         bfsTemp = bfsTemp.parent
 
     prime_path = []
