@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-#todo Strategy 1 : BFS / A*
-#     Strategy 2:  BFS / A*
+#todo 
+#     Strategy 2:  BFS 
 #     Strategy 3:  
+#     Make loops for BFS / DFS 
+#     Test highest dim for BFS / DFS at p = .3
+#     Plot for DFS / BFS avg success
 
 
 import numpy as np
@@ -43,7 +46,7 @@ class ENode:
 
 row = [-1, 0, 0, 1]
 col = [0, -1, 1, 0]
-q = .3
+q = .2
 
 def createMatrix(Dim, p):
     Matrix = [ [ 0 for i in range(Dim) ] for j in range(Dim) ]
@@ -68,29 +71,33 @@ def printMatrix(Matrix):
     print('! = Fire')
     print('1 = Explored')
    
-    print(Matrix)
+    #print(Matrix)
     
 
 
-testMatrix = createMatrix(10, .24)
-dfsTestMatrix = deepcopy(testMatrix)
-astar_testMatrix = deepcopy(testMatrix)
+testMatrix = createMatrix(2500, .30)
+#dfsTestMatrix = deepcopy(testMatrix)
+#astar_testMatrix = deepcopy(testMatrix)
 
 bfsPathMatrix = deepcopy(testMatrix)
+'''
 dfsPathMatrix = deepcopy(testMatrix)
 astarPathMatrix = deepcopy(testMatrix)
 strat1Matrix = deepcopy(testMatrix)
 strat2Matrix = deepcopy(testMatrix)
+'''
 #printMatrix(testMatrix)
 
+bfs_nodes_explored = []
+a_star_avg = []
 
 
 
 
 
-
+N = len(testMatrix) - 1
 a = (0,0)
-b = (9,9)
+b = (N,N)
 
 
 def onFire(x,y,grid):
@@ -104,6 +111,7 @@ def onFire(x,y,grid):
     return k
 
 def advance_fire(curr_matrix):
+    N = len(curr_matrix)
     new_grid = deepcopy(curr_matrix)
     for i in range(len(curr_matrix)):
         for j in range(len(curr_matrix[0])):
@@ -112,28 +120,14 @@ def advance_fire(curr_matrix):
                 prob = 1 - pow((1-q),k)
                 if random.random() <= prob:
                     new_grid[i][j] = '!'
+                    
 
+    new_grid[0][0] = 'S'
+    new_grid[N-1][N-1] = 'G'
     return new_grid
 
-
-def runnerStrat(nodeTemp, Matrix):
-    stack = []
-    x = nodeTemp is not None 
-    if x:
-        while nodeTemp:
-            stack.append((bfsTemp.x,bfsTemp.y))
-            nodeTemp = nodeTemp.parent
-
-        prime_path = []
-        while stack:
-            prime_path.append(stack.pop())
-
-        Matrix = startFire(strat1Matrix)
-        
-        return prime_path
-
 def strategy1(path, matrix):
-    counter = 0
+    
     for curr in path:
         x = curr[0]
         y = curr[1]
@@ -146,8 +140,115 @@ def strategy1(path, matrix):
         counter = counter + 1
     
     print("Successfully exited the maze")
-    print(counter)
+    
     return matrix
+
+def strategy2(path,matrix):
+    
+    '''
+    while (iterator_index < len(path))
+
+    Take off first coord from path_arr
+    recompute shortest path
+    (path = getPathArray(nodeTemp))
+    if path does not exist, then return false
+    else advance to next element in path array:
+        iterator_index++
+
+    add path[iterator_index] to total_path
+
+    advance_fire
+
+
+    '''
+    total_path = set()
+    ordered_path = []
+    iterator_index = 0
+    while (len(path) > 0):
+        curr = path[0]
+        x = curr[0]
+        y = curr[1]
+        matrix[x][y] = 'X'
+        total_path.add(path[0])
+        ordered_path.append(path[0])
+        coord2x = path[len(path)-1][0]
+        coord2y = path[len(path)-1][1]
+        coord2 = (coord2x,coord2y)
+        nodeTemp = BFS(curr,coord2,matrix)
+        path = getPathArray(nodeTemp)
+        if len(path) == 0:
+            print("Paths failed, Maze Burned")
+            print("Attempted Path: ")
+            for i in ordered_path:
+                print(i, end = ' ')
+            print("")
+            return matrix
+        else:
+            #remove first element in path array 
+            
+            path = path[1:]
+            matrix = advance_fire(matrix)
+
+        
+    '''
+    total_path = set()
+    ordered_path = []  #start fire later?  + coordinate system ordered wrong, #not finding path
+    for curr in path:
+        
+        x = curr[0]
+        y = curr[1]
+        
+        coord2x = path[len(path)-1][0]
+        coord2y = path[len(path)-1][1]
+        
+        coord2 = (coord2x,coord2y)
+        print(curr,coord2)
+        nodeTemp = BFS(curr,coord2,matrix)
+        path = getPathArray(nodeTemp)
+
+        total_path.add((y,x))
+        ordered_path.append((y,x))
+        matrix[x][y] = 'X'
+        matrix = advance_fire(matrix)
+       
+
+
+        if (len(path) == 0):
+            print("Paths failed, Maze Burned")
+            print("Attempted Path: ")
+            for i in ordered_path:
+                print(i)
+            print("")
+            return matrix    
+   '''
+    for i in range(len(matrix)):
+        for j in range(len(matrix)):
+            if matrix[i][j] =='!' and (i,j) in total_path:
+                matrix[i][j] = 'B'
+    print("Successfully exited maze: ")
+    print("Path Taken: ")
+    for i in ordered_path:
+        print(i, end = ' ')
+
+    print("")
+    return matrix
+
+            
+def getPathArray(node):
+    stack = []
+    while node:
+        stack.append((node.x,node.y))
+        node = node.parent
+
+    prime_path = []
+    while stack:
+        prime_path.append(stack.pop())
+
+    return prime_path
+    
+
+
+
 
 dfsPath = []
 def DFSsearch(Coord1, Coord2, Matrix):
@@ -208,32 +309,16 @@ def DFSsearch(Coord1, Coord2, Matrix):
         '''
     return None
 
-def strategy2(path, Matrix):
-    for x in path:
-        if (Matrix[x[0]][x[1]] == '!'):
-            print('Maze is Fucked! Youve reached fire!!!')
-            return Matrix
-        else:
-            Matrix = advance_fire(Matrix)
-            
-            Coord2 = (path[-1][0], path[-1][1])
-            AStarTemp = a_star(x, Coord2, Matrix)
-            path = runnerStrat(AStarTemp, Matrix)
-            print(path)
-            
-    print("Successfully exited the maze!")
-    return Matrix
-
 def BFS(Coord1, Coord2, Matrix):
     q = deque()
+    visited = set()
     
-
-    if (Matrix[Coord2[0]][Coord2[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '_') or (Matrix[Coord1[0]][Coord1[1]] == '_'):
+    if (Matrix[Coord2[0]][Coord2[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '_') or (Matrix[Coord2[0]][Coord2[1]] == '_'):
         return None
  
     start = Node(Coord1[0],Coord1[1], None)
     q.append(start)
-    
+    counter = 0
     while q:
         
         curr = q.popleft()
@@ -248,20 +333,22 @@ def BFS(Coord1, Coord2, Matrix):
             #Compare the value  in the given matrix location
         # 3. Boundries
             #Compare the x and y boundries
-        if ( xPos < 0  or xPos >= len(Matrix) or yPos < 0 or yPos >= len(Matrix[0])  or ((Matrix[curr.x][curr.y]) == '1') or ((Matrix[curr.x][curr.y]) == '_')):
+        
+        if ( xPos < 0  or xPos >= len(Matrix) or yPos < 0 or yPos >= len(Matrix[0])  or ((curr.x,curr.y) in visited) or ((Matrix[curr.x][curr.y]) == '_') or Matrix[curr.x][curr.y] == '!' ):
             continue
+        
+        counter = counter  + 1
 
         if (xPos == Coord2[0] and yPos == Coord2[1]):
+            bfs_nodes_explored.append(counter)
             return curr
         
-        Matrix[xPos][yPos] = '1'
+        visited.add((curr.x,curr.y))
         
-        if (Matrix[Coord2[0]][Coord2[1]] == '!'):
-            return None
+        
+        
     
     
-       
-        
         #print(str(xPos) + "\t" + str(yPos))
             
         
@@ -282,6 +369,7 @@ def BFS(Coord1, Coord2, Matrix):
         queue.append((xPos, yPos + 1))
         queue.append((xPos, yPos - 1))
         '''
+    bfs_nodes_explored.append(counter)
     return None
     
 def heuristic(pointA, pointB):
@@ -297,7 +385,7 @@ def a_star(Coord1, Coord2, Matrix):
 
     pq = PriorityQueue()
     start = ENode(Coord1[0],Coord1[1],None,0,0)
-
+    counter = 0
     if (Matrix[Coord2[0]][Coord2[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '!') or (Matrix[Coord1[0]][Coord1[1]] == '_') or (Matrix[Coord1[0]][Coord1[1]] == '_'):
         return None
 
@@ -318,8 +406,9 @@ def a_star(Coord1, Coord2, Matrix):
             #Compare the x and y boundries
         if ( xPos < 0  or xPos >= len(Matrix) or yPos < 0 or yPos >= len(Matrix[0])  or ((Matrix[curr.x][curr.y]) == '1') or ((Matrix[curr.x][curr.y]) == '_')):
             continue
-
+        counter = counter + 1
         if (xPos == Coord2[0] and yPos == Coord2[1]):
+            a_star_avg.append(counter)
             return curr
         
         Matrix[xPos][yPos] = '1'
@@ -336,7 +425,7 @@ def a_star(Coord1, Coord2, Matrix):
             cost = hue  + dist
             next = ENode(x,y,curr,dist,cost)
             pq.put(next)
-
+    a_star_avg.append(counter)
     return None
 
 def getPath(node,matrix):
@@ -366,21 +455,13 @@ def startFire(matrix):
     return matrix
 
 
-
-
-
-
-
 #print(DFSsearch(a, b, testMatrix))
-print(dfsTestMatrix)
+#print(dfsTestMatrix)
 bfsTemp = BFS(a,b,testMatrix)
+'''
 dfsTemp = DFSsearch(a,b,dfsTestMatrix)
 astarTemp = a_star(a,b,astar_testMatrix)
-
-
-
-
-
+'''
 '''
 if dfsTemp:
   
@@ -389,7 +470,6 @@ if dfsTemp:
     print(l)
 else:
     print("no path")
-'''
 '''
 if bfsTemp: 
    
@@ -406,10 +486,9 @@ if astarTemp:
 else:
     print("no path")
 print(heuristic(a,b))
-
-"""
+'''
+'''
 print("Trying Strategy 1---------------------------------------|")
-
 stack = []
 x = bfsTemp is not None 
 if x:
@@ -424,30 +503,23 @@ if x:
 
     strat1Matrix = startFire(strat1Matrix)
     print(strategy1(prime_path,strat1Matrix))    
-
-def strategy2(path):
-    run A* from the beginning node, 
-    find a path
-    from the top of the stack start popping nodes to reveal the path (Keep track of the previously popped node)
-    if a popped node is under fire
-        clear the stack
-        re run DFS from the prevoiusly popped node
-        populate the stack -> continue
-        'startover'
-"""
-print("Testing Strategy 2-------------------------------------|")
+'''
+'''
+print("Trying Strategy 2--------------------------------------|")
 stack = []
-x = astarTemp is not None 
+x = bfsTemp is not None 
 if x:
     
-    while astarTemp:
-        stack.append((astarTemp.x,astarTemp.y))
-        astarTemp = astarTemp.parent
+    while bfsTemp:
+        stack.append((bfsTemp.x,bfsTemp.y))
+        bfsTemp = bfsTemp.parent
 
     prime_path = []
     while stack:
         prime_path.append(stack.pop())
 
     strat2Matrix = startFire(strat2Matrix)
-    print('e')
-    print(strategy2(prime_path,strat2Matrix))  
+    print(strategy2(prime_path,strat2Matrix))
+
+    
+'''
