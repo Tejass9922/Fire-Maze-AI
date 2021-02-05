@@ -75,17 +75,17 @@ def printMatrix(Matrix):
     
 
 
-testMatrix = createMatrix(2500, .30)
+testMatrix = createMatrix(15, .30)
 #dfsTestMatrix = deepcopy(testMatrix)
 #astar_testMatrix = deepcopy(testMatrix)
 
 bfsPathMatrix = deepcopy(testMatrix)
-'''
+
 dfsPathMatrix = deepcopy(testMatrix)
 astarPathMatrix = deepcopy(testMatrix)
 strat1Matrix = deepcopy(testMatrix)
 strat2Matrix = deepcopy(testMatrix)
-'''
+
 #printMatrix(testMatrix)
 
 bfs_nodes_explored = []
@@ -169,8 +169,8 @@ def strategy2(path,matrix):
         x = curr[0]
         y = curr[1]
         matrix[x][y] = 'X'
-        total_path.add(path[0])
-        ordered_path.append(path[0])
+        total_path.add((y,x))
+        ordered_path.append((y,x))
         coord2x = path[len(path)-1][0]
         coord2y = path[len(path)-1][1]
         coord2 = (coord2x,coord2y)
@@ -206,8 +206,7 @@ def strategy2(path,matrix):
         nodeTemp = BFS(curr,coord2,matrix)
         path = getPathArray(nodeTemp)
 
-        total_path.add((y,x))
-        ordered_path.append((y,x))
+       
         matrix[x][y] = 'X'
         matrix = advance_fire(matrix)
        
@@ -504,7 +503,7 @@ if x:
     strat1Matrix = startFire(strat1Matrix)
     print(strategy1(prime_path,strat1Matrix))    
 '''
-'''
+
 print("Trying Strategy 2--------------------------------------|")
 stack = []
 x = bfsTemp is not None 
@@ -522,4 +521,4 @@ if x:
     print(strategy2(prime_path,strat2Matrix))
 
     
-'''
+
