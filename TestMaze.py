@@ -75,7 +75,7 @@ def printMatrix(Matrix):
     #print(Matrix)
     
 
-
+'''
 testMatrix = createMatrix(3500, .30)
 #dfsTestMatrix = deepcopy(testMatrix)
 #astar_testMatrix = deepcopy(testMatrix)
@@ -86,7 +86,7 @@ dfsPathMatrix = deepcopy(testMatrix)
 astarPathMatrix = deepcopy(testMatrix)
 strat1Matrix = deepcopy(testMatrix)
 strat2Matrix = deepcopy(testMatrix)
-
+'''
 #printMatrix(testMatrix)
 
 bfs_nodes_explored = []
@@ -96,9 +96,6 @@ a_star_avg = []
 
 
 
-N = len(testMatrix) - 1
-a = (0,0)
-b = (N,N)
 
 
 def onFire(x,y,grid):
@@ -457,7 +454,7 @@ def startFire(matrix):
 
 #print(DFSsearch(a, b, testMatrix))
 #print(dfsTestMatrix)
-bfsTemp = BFS(a,b,testMatrix)
+#bfsTemp = BFS(a,b,testMatrix)
 #dfsTemp = DFSsearch(a,b,dfsTestMatrix)
 #astarTemp = a_star(a,b,astar_testMatrix)
 '''
@@ -473,7 +470,7 @@ if dfsTemp:
 else:
     print("no path")
 '''
-
+'''
 if bfsTemp: 
    
     print("BFS Path: ")
@@ -482,7 +479,7 @@ if bfsTemp:
 
 else:
     print("no path")
-
+'''
 '''
 if astarTemp:
     print("A* Path: ")
@@ -532,8 +529,11 @@ fire_rate= np.linspace(.1,1,10)
 dfs_success_counter = 0
 success_tracker = []
 for p in fire_rate:
-    for i  in  range(10):
+    for i  in  range(100):
         loop_matrix = createMatrix(100,p)
+        N = len(loop_matrix) - 1
+        a = (0,0)
+        b = (N,N)
         dfsNode = DFSsearch(a,b,loop_matrix)
         if dfsNode:
             dfs_success_counter += 1
@@ -541,4 +541,6 @@ for p in fire_rate:
     success_tracker.append(dfs_success_counter)
     dfs_success_counter = 0
 
+print(fire_rate)
+print(success_tracker)
 plt.plot(fire_rate,success_tracker)
