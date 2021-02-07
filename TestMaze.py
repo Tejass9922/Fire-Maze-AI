@@ -16,6 +16,7 @@ from collections import deque
 from copy import copy, deepcopy
 from queue import PriorityQueue
 from dataclasses import dataclass, field
+import matplotlib.pyplot as plt
 
 # queue node used in BFS
 class Node:
@@ -75,7 +76,7 @@ def printMatrix(Matrix):
     
 
 
-testMatrix = createMatrix(15, .30)
+testMatrix = createMatrix(3500, .30)
 #dfsTestMatrix = deepcopy(testMatrix)
 #astar_testMatrix = deepcopy(testMatrix)
 
@@ -457,9 +458,11 @@ def startFire(matrix):
 #print(DFSsearch(a, b, testMatrix))
 #print(dfsTestMatrix)
 bfsTemp = BFS(a,b,testMatrix)
+#dfsTemp = DFSsearch(a,b,dfsTestMatrix)
+#astarTemp = a_star(a,b,astar_testMatrix)
 '''
-dfsTemp = DFSsearch(a,b,dfsTestMatrix)
-astarTemp = a_star(a,b,astar_testMatrix)
+
+
 '''
 '''
 if dfsTemp:
@@ -470,13 +473,16 @@ if dfsTemp:
 else:
     print("no path")
 '''
+
 if bfsTemp: 
    
     print("BFS Path: ")
     l = getPath(bfsTemp,bfsPathMatrix)
     print(l)
+
 else:
     print("no path")
+
 '''
 if astarTemp:
     print("A* Path: ")
@@ -503,7 +509,7 @@ if x:
     strat1Matrix = startFire(strat1Matrix)
     print(strategy1(prime_path,strat1Matrix))    
 '''
-
+'''
 print("Trying Strategy 2--------------------------------------|")
 stack = []
 x = bfsTemp is not None 
@@ -521,4 +527,18 @@ if x:
     print(strategy2(prime_path,strat2Matrix))
 
     
+'''
+fire_rate= np.linspace(.1,1,10)
+dfs_success_counter = 0
+success_tracker = []
+for p in fire_rate:
+    for i  in  range(10):
+        loop_matrix = createMatrix(100,p)
+        dfsNode = DFSsearch(a,b,loop_matrix)
+        if dfsNode:
+            dfs_success_counter += 1
 
+    success_tracker.append(dfs_success_counter)
+    dfs_success_counter = 0
+
+plt.plot(fire_rate,success_tracker)
