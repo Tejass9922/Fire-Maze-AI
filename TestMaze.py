@@ -108,7 +108,7 @@ def onFire(x,y,grid):
                 k = k + 1
     return k
 
-def advance_fire(curr_matrix):
+def advance_fire(curr_matrix,q):
     N = len(curr_matrix)
     new_grid = deepcopy(curr_matrix)
     for i in range(len(curr_matrix)):
@@ -140,6 +140,68 @@ def strategy1(path, matrix):
     print("Successfully exited the maze")
     
     return matrix
+
+
+def strat1_graph(path, matrix,q):
+    for curr in path:
+        x = curr[0]
+        y = curr[1]
+        if matrix[x][y] == '!':
+            #print("Path Failed, Maze burned")
+            return False
+        else:
+            matrix[x][y] = 'X'
+            matrix = advance_fire(matrix,q)
+        #counter = counter + 1
+    
+    #print("Successfully exited the maze")
+    
+    return True
+
+def strat2_graph(path, matrix,q):
+    total_path = set()
+    ordered_path = []
+    iterator_index = 0
+    while (len(path) > 0):
+        curr = path[0]
+        x = curr[0]
+        y = curr[1]
+        matrix[x][y] = 'X'
+        total_path.add((y,x))
+        ordered_path.append((y,x))
+        coord2x = path[len(path)-1][0]
+        coord2y = path[len(path)-1][1]
+        coord2 = (coord2x,coord2y)
+        nodeTemp = BFS(curr,coord2,matrix)
+        path = getPathArray(nodeTemp)
+        if len(path) == 0:
+            '''
+            print("Paths failed, Maze Burned")
+            print("Attempted Path: ")
+            for i in ordered_path:
+                print(i, end = ' ')
+            print("")
+            '''
+            return False
+        else:
+            #remove first element in path array 
+            
+            path = path[1:]
+            matrix = advance_fire(matrix,q)
+           
+    '''
+    for i in range(len(matrix)):
+        for j in range(len(matrix)):
+            if matrix[i][j] =='!' and (i,j) in total_path:
+                matrix[i][j] = 'B'
+    print("Successfully exited maze: ")
+    print("Path Taken: ")
+    for i in ordered_path:
+        print(i, end = ' ')
+
+    print("")
+    '''
+    return True
 
 def strategy2(path,matrix):
     
@@ -186,38 +248,8 @@ def strategy2(path,matrix):
             
             path = path[1:]
             matrix = advance_fire(matrix)
+           
 
-        
-    '''
-    total_path = set()
-    ordered_path = []  #start fire later?  + coordinate system ordered wrong, #not finding path
-    for curr in path:
-        
-        x = curr[0]
-        y = curr[1]
-        
-        coord2x = path[len(path)-1][0]
-        coord2y = path[len(path)-1][1]
-        
-        coord2 = (coord2x,coord2y)
-        print(curr,coord2)
-        nodeTemp = BFS(curr,coord2,matrix)
-        path = getPathArray(nodeTemp)
-
-       
-        matrix[x][y] = 'X'
-        matrix = advance_fire(matrix)
-       
-
-
-        if (len(path) == 0):
-            print("Paths failed, Maze Burned")
-            print("Attempted Path: ")
-            for i in ordered_path:
-                print(i)
-            print("")
-            return matrix    
-   '''
     for i in range(len(matrix)):
         for j in range(len(matrix)):
             if matrix[i][j] =='!' and (i,j) in total_path:
@@ -375,7 +407,7 @@ def heuristic(pointA, pointB):
   
     # calculating Euclidean distance 
     # using linalg.norm() 
-    hue = np.linalg.norm(point1 - point2) 
+    hue = np.linalg.norm(point1 - point2)
     return hue
 
 def a_star(Coord1, Coord2, Matrix):
@@ -525,12 +557,14 @@ if x:
 
     
 '''
-fire_rate= np.linspace(.1,1,10)
+'''
+#-- DFS success rate vs obsticle density (p)
+obsticle_density= np.linspace(.1,1,10)
 dfs_success_counter = 0
 success_tracker = []
-for p in fire_rate:
+for p in obsticle_density:
     for i  in  range(100):
-        loop_matrix = createMatrix(100,p)
+        loop_matrix = createMatrix(10,p)
         N = len(loop_matrix) - 1
         a = (0,0)
         b = (N,N)
@@ -538,9 +572,77 @@ for p in fire_rate:
         if dfsNode:
             dfs_success_counter += 1
 
-    success_tracker.append(dfs_success_counter)
+    success_tracker.append(dfs_success_counter / float(100))
     dfs_success_counter = 0
 
-print(fire_rate)
+print(obsticle_density)
 print(success_tracker)
-plt.plot(fire_rate,success_tracker)
+
+plt.plot(obsticle_density,success_tracker)
+
+#--- BFS - A star nodes explored vs obsticle density (p)---
+
+diff = []
+for p in obsticle_density:
+    for i  in  range(100):
+        loop_matrix = createMatrix(10,p)
+        N = len(loop_matrix) - 1
+        a = (0,0)
+        b = (N,N)
+        bfsNode = BFS(a,b,loop_matrix)
+        a_star_node = a_star(a,b,loop_matrix)
+        
+    bfs_avg_nodes_explored = float((sum(bfs_nodes_explored) / len(bfs_nodes_explored)))
+    a_star_avg_nodes = (sum(a_star_avg) / len(a_star_avg))
+    diff.append(bfs_avg_nodes_explored - a_star_avg_nodes)
+    bfs_nodes_explored = []
+    a_star_avg = []
+    diff = [round(num, 2) for num in diff]
+
+'''
+#--- Strategy 1  and  Strategy 2 success rate vs. fire intensity (q) with stable obstacle density (p = .3)---
+fire_rate = np.linspace(.1,1,10)
+success_strat1 = []
+success_strat2 = []
+s1_count = 0
+s2_count = 0
+for qf in fire_rate:
+    for j in range(100):
+        strat1 = createMatrix(10,.3)
+        strat2 = deepcopy(strat1)
+        N = len(strat1) - 1
+        a = (0,0)
+        b = (N,N)
+        bfsNode = BFS(a,b,strat1)
+        stack = []
+        if (bfsNode is not None):
+            while bfsNode:
+                stack.append((bfsNode.x,bfsNode.y))
+                bfsNode = bfsNode.parent
+
+            prime_path = []
+            while stack:
+                prime_path.append(stack.pop())
+
+            strat1Matrix = startFire(strat1)
+            strat2Matrix = deepcopy(strat1Matrix)
+            strat_1_result = strat1_graph(prime_path,strat1Matrix,qf)
+            strat_2_result = strat2_graph(prime_path,strat2Matrix,qf)
+            
+            if strat_1_result:
+                s1_count += 1
+            
+            if strat_2_result:
+                s2_count += 1
+
+    success_strat1.append(s1_count)
+    success_strat2.append(s2_count)
+    s1_count = 0
+    s2_count = 0
+
+
+print("")
+print(success_strat1)
+print(success_strat2)
+print(fire_rate)
+
