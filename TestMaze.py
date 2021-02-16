@@ -216,7 +216,7 @@ def strat3_graph(path,matrix,q):
         y = curr[1]
         check_future_iterations = False
         i = 0
-        while (i < 8 and i < len(path)):
+        while (i < 2 and i < len(path)):
             t_curr = path[i]
             t_x = t_curr[0]
             t_y = t_curr[1]
@@ -301,7 +301,7 @@ def heu_s3(pointA,pointB,fireMap):
   
     # calculating Euclidean distance 
     # using linalg.norm() 
-    heu = np.linalg.norm(point1 - point2)  + ((fireMap[pointA[0]][pointA[1]])*9)
+    heu = np.linalg.norm(point1 - point2)  + ((fireMap[pointA[0]][pointA[1]])*10)
 
     return heu
 
@@ -857,7 +857,7 @@ s2_count = 0
 s3_count = 0
 for qf in fire_rate:
     for j in range(100):
-        strat1 = createMatrix(10,.3)
+        strat1 = createMatrix(9,.3)
         strat2 = deepcopy(strat1)
         strat3 = deepcopy(strat1)
         N = len(strat1) - 1
