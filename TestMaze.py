@@ -262,7 +262,27 @@ def strategy2(path,matrix):
     print("")
     return matrix
 
-            
+def buildFireMap(matrix):
+    fireMap = [ [ 0 for i in range(len(matrix)) ] for j in range(len(matrix)) ]
+
+    for i in range(len(matrix)):
+        for j in range(len(matrix)):
+            if (matrix[i][j] != '!' and matrix[i][j] != '_'):
+                k = onFire(i,j,matrix)
+                sample = []
+                for x in range(10):
+                    prob = 1 - pow((1-q),k)
+                    sample.append(prob)
+                avg = float(sum(sample) / float(len(sample)))
+                fireMap[i][j] = avg
+            elif matrix[i][j] == '_':
+                fireMap[i][j] = 0
+            elif matrix[i][j] == '!':
+                fireMap[i][j] = 1
+
+    return np.array(fireMap)
+
+
 def getPathArray(node):
     stack = []
     while node:
@@ -390,7 +410,8 @@ def BFS(Coord1, Coord2, Matrix):
             x = xPos + row[i]
             y = yPos + col[i]
             next = Node(x,y,curr)
-            q.append(next)
+            if next not in q:
+                q.append(next)
 
         '''
         queue.append((xPos + 1,yPos))
@@ -453,7 +474,18 @@ def a_star(Coord1, Coord2, Matrix):
             dist = (curr.parent.distance if curr.parent else 0)  + 1
             cost = hue  + dist
             next = ENode(x,y,curr,dist,cost)
-            pq.put(next)
+            '''
+            if not pq.empty():
+                print(pq.queue[0].priority)
+            '''
+            for open_node in pq.queue:
+                if next == open_node and next.distance >= open_node.g:
+                    break
+            else:
+               pq.put(next)
+            
+            
+            
     a_star_avg.append(counter)
     return None
 
@@ -488,7 +520,18 @@ def startFire(matrix):
 #print(dfsTestMatrix)
 #bfsTemp = BFS(a,b,testMatrix)
 #dfsTemp = DFSsearch(a,b,dfsTestMatrix)
-#astarTemp = a_star(a,b,astar_testMatrix)
+testMatrix = createMatrix(10,.2)
+astarPathMatrix = deepcopy(testMatrix)
+a = (0,0)
+b = (9,9)
+astar_testMatrix = deepcopy(testMatrix)
+astarTemp = a_star(a,b,astar_testMatrix)
+testFire = deepcopy(testMatrix)
+startFire(testFire)
+for i in range(10):
+    testFire = advance_fire(testFire,.3)
+print(testFire)
+print(buildFireMap(testFire))
 '''
 
 
@@ -600,6 +643,7 @@ for p in obsticle_density:
     diff = [round(num, 2) for num in diff]
 
 '''
+'''
 #--- Strategy 1  and  Strategy 2 success rate vs. fire intensity (q) with stable obstacle density (p = .3)---
 fire_rate = np.linspace(.1,1,10)
 success_strat1 = []
@@ -646,3 +690,4 @@ print(success_strat1)
 print(success_strat2)
 print(fire_rate)
 
+'''
