@@ -26,7 +26,8 @@ class Node:
         self.x = x
         self.y = y
         self.parent = parent
- 
+    def __eq__(self,other):
+        return (self.x == other.x) and (self.y == other.y)
     def __repr__(self):
         return str((self.x, self.y))
 class ENode:
@@ -40,6 +41,8 @@ class ENode:
         self.priority = priority
     def __lt__(self, other):
         return self.priority < other.priority
+    def __eq__(self,other):
+        return (self.x == other.x) and (self.y == other.y)
     def __repr__(self):
         return str((self.x, self.y))
 
@@ -216,7 +219,7 @@ def strat3_graph(path,matrix,q):
         y = curr[1]
         check_future_iterations = False
         i = 0
-        while (i < 2 and i < len(path)):
+        while (i < len(path)):
             t_curr = path[i]
             t_x = t_curr[0]
             t_y = t_curr[1]
@@ -345,19 +348,28 @@ def a_star_s3(Coord1,Coord2,Matrix,fireMap):
             if (x < 0 or x >= len(Matrix) or y < 0 or y >= len(Matrix[0])):
                 continue
             hue = heu_s3((x,y),Coord2,fireMap)
-            dist = (curr.parent.distance if curr.parent else 0)  + 1
+            dist = (curr.distance if curr.parent else 0)  + 1
             cost = hue  + dist
             next = ENode(x,y,curr,dist,cost)
-            
-            for open_node in pq.queue:
-                if next == open_node and next.distance >= open_node.distance:
-                    break
-            else:
-               pq.put(next)
 
+            inSet = next in pq.queue
+            for open_node in pq.queue:
+                if open_node == next and ():
+                    if curr.distance + 1 < open_node.distance:
+                        open_node.distance = curr.distance + 1
+                        open_node.parent = curr
+                        break
+            else:
+                pq.put(next)
+                    
+            
     return None
 
+    '''
+    for loop -> all of PQ
 
+
+    '''
 def strategy3(path,matrix,q):
     start = path[0]
     total_path = set()
@@ -372,7 +384,7 @@ def strategy3(path,matrix,q):
         y = curr[1]
         check_future_iterations = False
         i = 0
-        while (i < 4 and i < len(path)):
+        while (i < len(path)):
             t_curr = path[i]
             t_x = t_curr[0]
             t_y = t_curr[1]
@@ -404,9 +416,10 @@ def strategy3(path,matrix,q):
             total_path.add((y,x))
             ordered_path.append((y,x))
             path = path[1:] 
+            matrix = advance_fire(matrix,q)
+            fireMap = buildFireMap(matrix)
 
-        matrix = advance_fire(matrix,q)
-        fireMap = buildFireMap(matrix)
+        
 
     for i in range(len(matrix)):
         for j in range(len(matrix)):
@@ -639,7 +652,10 @@ def a_star(Coord1, Coord2, Matrix):
                 print(pq.queue[0].priority)
             '''
             for open_node in pq.queue:
+                print(next,end = ' ')
+                print(open_node)
                 if next == open_node and next.distance >= open_node.distance:
+                  
                     break
             else:
                pq.put(next)
@@ -678,7 +694,7 @@ def startFire(matrix):
 
 #print(DFSsearch(a, b, testMatrix))
 #print(dfsTestMatrix)
-#testMatrix = createMatrix(10,.2)
+testMatrix = createMatrix(10,0)
 '''
 arr = [['S','0','0','_','0','_','0','0','0','0'],
  ['0','0','0','0','0','_','0','_','_','0'],
@@ -692,11 +708,26 @@ arr = [['S','0','0','_','0','_','0','0','0','0'],
  ['0','0','_','0','_','0','0','0','0','G']]
 arr = np.array(arr)
 '''
-#a = (0,0)
-#b = (9,9)
+'''
+a = (0,0)
+b = (9,9)
 
-#bfsTemp = BFS(a,b,arr)
-#strat2Matrix = deepcopy(arr)
+test123 = deepcopy(testMatrix)
+fireMap = buildFireMap(test123)
+s3_astar = a_star_s3(a,b,test123,fireMap)
+
+stack = []
+if s3_astar:
+     while s3_astar:
+        stack.append((s3_astar.x,s3_astar.y))
+        s3_astar = s3_astar.parent
+
+     prime_path = stack[::-1] 
+     print(prime_path)
+else:
+    print("no path")
+'''  
+
 '''
 
 
@@ -898,8 +929,8 @@ for qf in fire_rate:
                 prime_path = stack[::-1] 
                 strat3_result = strat3_graph(prime_path,strat3Matrix,qf)
 
-            if strat3_result:
-                s3_count += 1
+                if strat3_result:
+                    s3_count += 1
 
 
     success_strat1.append(s1_count)
