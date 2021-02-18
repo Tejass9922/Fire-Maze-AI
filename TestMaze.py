@@ -50,7 +50,7 @@ class ENode:
 
 row = [-1, 0, 0, 1]
 col = [0, -1, 1, 0]
-q = .2
+
 
 def createMatrix(Dim, p):
     Matrix = [ [ 0 for i in range(Dim) ] for j in range(Dim) ]
@@ -165,6 +165,7 @@ def strat2_graph(path, matrix,q):
     total_path = set()
     ordered_path = []
     iterator_index = 0
+    #fireMap = buildFireMap(matrix)
     while (len(path) > 0):
         curr = path[0]
         x = curr[0]
@@ -176,15 +177,9 @@ def strat2_graph(path, matrix,q):
         coord2y = path[len(path)-1][1]
         coord2 = (coord2x,coord2y)
         nodeTemp = BFS(curr,coord2,matrix)
+        #nodeTemp = a_star_s3(curr,coord2,matrix,fireMap)
         path = getPathArray(nodeTemp)
         if len(path) == 0:
-            '''
-            print("Paths failed, Maze Burned")
-            print("Attempted Path: ")
-            for i in ordered_path:
-                print(i, end = ' ')
-            print("")
-            '''
             return False
         else:
             #remove first element in path array 
@@ -192,18 +187,36 @@ def strat2_graph(path, matrix,q):
             path = path[1:]
             matrix = advance_fire(matrix,q)
            
-    '''
-    for i in range(len(matrix)):
-        for j in range(len(matrix)):
-            if matrix[i][j] =='!' and (i,j) in total_path:
-                matrix[i][j] = 'B'
-    print("Successfully exited maze: ")
-    print("Path Taken: ")
-    for i in ordered_path:
-        print(i, end = ' ')
-
-    print("")
-    '''
+    return True
+def strat4_graph(path, matrix,q):
+    total_path = set()
+    ordered_path = []
+    iterator_index = 0
+    fireMap = buildFireMap(matrix,q)
+    while (len(path) > 0):
+        curr = path[0]
+        x = curr[0]
+        y = curr[1]
+        matrix[x][y] = 'X'
+        total_path.add((y,x))
+        ordered_path.append((y,x))
+        next = path[1] if len(path) > 1 else (-1,-1)
+        if next != (-1,-1) and fireMap[next[0]][next[1]] >=.2 :
+            coord2x = path[len(path)-1][0]
+            coord2y = path[len(path)-1][1]
+            coord2 = (coord2x,coord2y)
+            nodeTemp = a_star_s3(curr,coord2,matrix,fireMap)
+            path = getPathArray(nodeTemp)
+        if len(path) == 0:
+            return False
+        else:
+            #remove first element in path array 
+            
+            path = path[1:]
+            matrix = advance_fire(matrix,q)
+            fireMap = buildFireMap(matrix,q)
+            
+   
     return True
 def strat3_graph(path,matrix,q):
     start = path[0]
@@ -218,21 +231,26 @@ def strat3_graph(path,matrix,q):
         x = curr[0]
         y = curr[1]
         check_future_iterations = False
-        i = 0
-        while (i < len(path)):
+        i = 1
+        '''
+        while (i < 2 and i <len(path)):
             t_curr = path[i]
             t_x = t_curr[0]
             t_y = t_curr[1]
-            if fireMap[t_x][t_y] >=.2:
+            if fireMap[t_x][t_y] >=.1:
                 check_future_iterations = True
                 break
             i = i  + 1
+        '''
         if (matrix[x][y] == '!' or check_future_iterations):
             coord2x = path[len(path)-1][0]
             coord2y = path[len(path)-1][1]
             coord2 = (coord2x,coord2y)
-            coord1 = (ordered_path[-1][1],ordered_path[-1][0])
+            coord1 = (ordered_path[-1][1],ordered_path[-1][0]) if len(ordered_path) >0 else start
             nodeTemp = a_star_s3(coord1 if len(ordered_path) > 0 else start ,coord2,matrix,fireMap)
+            #nodeTemp =  BFS(coord1,coord2,matrix)
+            #nodeTemp = DFSsearch(coord1,coord2,matrix)
+            
             path = getPathArray(nodeTemp)
         
         if len(path) == 0:
@@ -304,7 +322,7 @@ def heu_s3(pointA,pointB,fireMap):
   
     # calculating Euclidean distance 
     # using linalg.norm() 
-    heu = np.linalg.norm(point1 - point2)  + ((fireMap[pointA[0]][pointA[1]])*10)
+    heu = np.linalg.norm(point1 - point2)  + ((fireMap[pointA[0]][pointA[1]])*20)
 
     return heu
 
@@ -356,7 +374,7 @@ def a_star_s3(Coord1,Coord2,Matrix,fireMap):
             for open_node in pq.queue:
                 if open_node == next and ():
                     if curr.distance + 1 < open_node.distance:
-                        open_node.distance = curr.distance + 1
+                        open_node.distance = curr.distance if curr.parent else 0 + 1
                         open_node.parent = curr
                         break
             else:
@@ -435,7 +453,7 @@ def strategy3(path,matrix,q):
     return matrix
     
 
-def buildFireMap(matrix):
+def buildFireMap(matrix,q):
     fireMap = [ [ 0 for i in range(len(matrix)) ] for j in range(len(matrix)) ]
 
     for i in range(len(matrix)):
@@ -883,9 +901,11 @@ fire_rate = np.linspace(.1,1,10)
 success_strat1 = []
 success_strat2 = []
 success_strat3 = []
+success_strat4 = []
 s1_count = 0
 s2_count = 0
 s3_count = 0
+s4_count = 0
 for qf in fire_rate:
     for j in range(100):
         strat1 = createMatrix(9,.3)
@@ -908,6 +928,7 @@ for qf in fire_rate:
             strat1Matrix = startFire(strat1)
             strat2Matrix = deepcopy(strat1Matrix)
             strat3Matrix = deepcopy(strat1Matrix)
+            strat4Matrix = deepcopy(strat1Matrix)
             strat_1_result = strat1_graph(prime_path,strat1Matrix,qf)
             strat_2_result = strat2_graph(prime_path,strat2Matrix,qf)  
             
@@ -917,9 +938,10 @@ for qf in fire_rate:
             if strat_2_result:
                 s2_count += 1
 
-            fireMap = buildFireMap(strat1)
+            fireMap = buildFireMap(strat1,qf)
             astar_node = a_star_s3(a,b,strat1,fireMap)  
             stack = []
+            
             x = astar_node is not None 
             if x:
                 while astar_node:
@@ -927,23 +949,28 @@ for qf in fire_rate:
                     astar_node = astar_node.parent
 
                 prime_path = stack[::-1] 
-                strat3_result = strat3_graph(prime_path,strat3Matrix,qf)
-
-                if strat3_result:
-                    s3_count += 1
-
+                #strat3_result = strat3_graph(prime_path,strat3Matrix,qf)
+                strat4_result = strat4_graph(prime_path,strat4Matrix,qf)
+                #if strat3_result:
+                   # s3_count += 1
+            
+                if strat4_result:
+                    s4_count +=1
 
     success_strat1.append(s1_count)
     success_strat2.append(s2_count)
     success_strat3.append(s3_count)
+    success_strat4.append(s4_count)
     s1_count = 0
     s2_count = 0
     s3_count = 0
+    s4_count = 0
 
 
 print("")
 print(success_strat1)
 print(success_strat2)
-print(success_strat3)
+#print(success_strat3)
+print(success_strat4)
 print(fire_rate)
 
