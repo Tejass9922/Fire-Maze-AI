@@ -201,13 +201,14 @@ def strat4_graph(path, matrix,q):
         total_path.add((y,x))
         ordered_path.append((y,x))
         next = path[1] if len(path) > 1 else (-1,-1)
-        if next != (-1,-1) and fireMap[next[0]][next[1]] >=.2 :
+        if next != (-1,-1) and fireMap[next[0]][next[1]] >=.1:
             coord2x = path[len(path)-1][0]
             coord2y = path[len(path)-1][1]
             coord2 = (coord2x,coord2y)
             nodeTemp = a_star_s3(curr,coord2,matrix,fireMap)
             path = getPathArray(nodeTemp)
         if len(path) == 0:
+           
             return False
         else:
             #remove first element in path array 
@@ -215,7 +216,7 @@ def strat4_graph(path, matrix,q):
             path = path[1:]
             matrix = advance_fire(matrix,q)
             fireMap = buildFireMap(matrix,q)
-            
+
    
     return True
 def strat3_graph(path,matrix,q):
@@ -712,24 +713,35 @@ def startFire(matrix):
 
 #print(DFSsearch(a, b, testMatrix))
 #print(dfsTestMatrix)
-testMatrix = createMatrix(10,0)
-'''
-arr = [['S','0','0','_','0','_','0','0','0','0'],
- ['0','0','0','0','0','_','0','_','_','0'],
- ['_','!','_','0','0','0','0','0','_','0'],
- ['!','!','!','0','_','0','0','0','0','_'],
- ['!','!','!','0','_','_','0','0','_','0'],
- ['0','!','!','0','0','0','0','0','0','0'],
- ['0','0','0','0','_','0','0','0','0','0'],
- ['0','0','0','0','_','_','0','_','0','_'],
+
+
+arr = [['S','0','0','0','0','0','0','0','0','0'],
  ['0','0','0','0','0','0','0','0','0','0'],
- ['0','0','_','0','_','0','0','0','0','G']]
+ ['0','!','0','0','0','0','0','0','0','0'],
+ ['!','!','!','0','0','0','0','0','0','0'],
+ ['!','!','!','0','0','0','0','0','0','0'],
+ ['0','!','!','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','0','G']]
+
 arr = np.array(arr)
-'''
-'''
+test_arr = [['S','0','0','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','0','0'],
+ ['0','!','0','0','0','0','0','0','0','0'],
+ ['!','!','!','0','0','0','0','0','0','0'],
+ ['!','!','!','0','0','0','0','0','0','0'],
+ ['0','!','!','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','0','0'],
+ ['0','0','0','0','0','0','0','0','!','!'],
+ ['0','0','0','0','0','0','0','0','!','G']]
+test_arr = np.array(test_arr)
+testMatrix = createMatrix(10,0)
 a = (0,0)
 b = (9,9)
-
+'''
 test123 = deepcopy(testMatrix)
 fireMap = buildFireMap(test123)
 s3_astar = a_star_s3(a,b,test123,fireMap)
@@ -744,19 +756,22 @@ if s3_astar:
      print(prime_path)
 else:
     print("no path")
-'''  
 
 '''
+
+
 
 
 #dfsTemp = DFSsearch(a,b,dfsTestMatrix)
 '''
 '''
+'''
 print("Testing Strategy 3 ------------------------------------|")
 
-strat3matrix = deepcopy(testMatrix)
+strat3matrix = deepcopy(arr)
+print(strat3matrix)
 startFire(strat3matrix)
-fireMap = buildFireMap(strat3matrix)
+fireMap = buildFireMap(strat3matrix,.2)
 s3_astar = a_star_s3(a,b,strat3matrix,fireMap)
 stack = []
 x = s3_astar is not None 
@@ -766,7 +781,7 @@ if x:
         s3_astar = s3_astar.parent
 
     prime_path = stack[::-1] 
-    print(strategy3(prime_path,strat3matrix,q))
+    print(strat4_graph(prime_path,test_arr,.2))
 else:
     print("No path")
 
@@ -896,7 +911,7 @@ for p in obsticle_density:
 
 '''
 
-#--- Strategy 1  and  Strategy 2 success rate vs. fire intensity (q) with stable obstacle density (p = .3)---
+#--- Strategy 1  and  Strategy 2 and Strategy 3 success rate vs. fire intensity (q) with stable obstacle density (p = .3)---
 fire_rate = np.linspace(.1,1,10)
 success_strat1 = []
 success_strat2 = []
@@ -906,9 +921,10 @@ s1_count = 0
 s2_count = 0
 s3_count = 0
 s4_count = 0
+path_counter = 0
 for qf in fire_rate:
-    for j in range(100):
-        strat1 = createMatrix(9,.3)
+    while path_counter < 100:
+        strat1 = createMatrix(10,.3)
         strat2 = deepcopy(strat1)
         strat3 = deepcopy(strat1)
         N = len(strat1) - 1
@@ -925,52 +941,61 @@ for qf in fire_rate:
             while stack:
                 prime_path.append(stack.pop())
 
+           
+            fireMap = buildFireMap(strat3,qf)
+            astar_node = a_star_s3(a,b,strat3,fireMap)  
             strat1Matrix = startFire(strat1)
             strat2Matrix = deepcopy(strat1Matrix)
             strat3Matrix = deepcopy(strat1Matrix)
             strat4Matrix = deepcopy(strat1Matrix)
             strat_1_result = strat1_graph(prime_path,strat1Matrix,qf)
             strat_2_result = strat2_graph(prime_path,strat2Matrix,qf)  
-            
+
+           
             if strat_1_result:
                 s1_count += 1
             
             if strat_2_result:
                 s2_count += 1
 
-            fireMap = buildFireMap(strat1,qf)
-            astar_node = a_star_s3(a,b,strat1,fireMap)  
+          
             stack = []
             
-            x = astar_node is not None 
-            if x:
-                while astar_node:
-                    stack.append((astar_node.x,astar_node.y))
-                    astar_node = astar_node.parent
 
-                prime_path = stack[::-1] 
-                #strat3_result = strat3_graph(prime_path,strat3Matrix,qf)
-                strat4_result = strat4_graph(prime_path,strat4Matrix,qf)
-                #if strat3_result:
-                   # s3_count += 1
+            while astar_node:
+                stack.append((astar_node.x,astar_node.y))
+                astar_node = astar_node.parent
+
+            prime_path = stack[::-1] 
+            #strat3_result = strat3_graph(prime_path,strat3Matrix,qf)
+            strat4_result = strat4_graph(prime_path,strat4Matrix,qf)
+            #if strat3_result:
+                # s3_count += 1
+        
+            if strat4_result:
+                s4_count +=1
             
-                if strat4_result:
-                    s4_count +=1
+            path_counter +=1
 
-    success_strat1.append(s1_count)
-    success_strat2.append(s2_count)
-    success_strat3.append(s3_count)
-    success_strat4.append(s4_count)
+    success_strat1.append(float((float(s1_count)/float(path_counter))))
+    success_strat2.append(float((float(s2_count)/float(path_counter))))
+    success_strat4.append(float((float(s4_count)/float(path_counter))))
     s1_count = 0
     s2_count = 0
     s3_count = 0
     s4_count = 0
+    path_counter = 0
 
 
 print("")
+success_strat1 = [round(num,3) for num in success_strat1]
+success_strat2 = [round(num,3) for num in success_strat2]
+success_strat4 = [round(num,3) for num in success_strat4]
+
 print(success_strat1)
 print(success_strat2)
-#print(success_strat3)
 print(success_strat4)
 print(fire_rate)
+
+
 
