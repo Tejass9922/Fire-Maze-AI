@@ -201,21 +201,20 @@ def strat4_graph(path, matrix,q):
         total_path.add((y,x))
         ordered_path.append((y,x))
         next = path[1] if len(path) > 1 else (-1,-1)
-        if next != (-1,-1) and fireMap[next[0]][next[1]] >=.1:
+        if next != (-1,-1) and fireMap[next[0]][next[1]] >=0:
             coord2x = path[len(path)-1][0]
             coord2y = path[len(path)-1][1]
             coord2 = (coord2x,coord2y)
             nodeTemp = a_star_s3(curr,coord2,matrix,fireMap)
             path = getPathArray(nodeTemp)
-        if len(path) == 0:
-           
-            return False
-        else:
+            if len(path) == 0:
+                return False
+        
             #remove first element in path array 
             
-            path = path[1:]
-            matrix = advance_fire(matrix,q)
-            fireMap = buildFireMap(matrix,q)
+        path = path[1:]
+        matrix = advance_fire(matrix,q)
+        fireMap = buildFireMap(matrix,q)
 
    
     return True
@@ -323,7 +322,8 @@ def heu_s3(pointA,pointB,fireMap):
   
     # calculating Euclidean distance 
     # using linalg.norm() 
-    heu = np.linalg.norm(point1 - point2)  + ((fireMap[pointA[0]][pointA[1]])*20)
+    #hue = (abs(point1[0]- point2[0]) + abs(point1[1]-[point2[1]])) + ((fireMap[pointA[0]][pointA[1]])*100)
+    heu = np.linalg.norm(point1 - point2) + ((fireMap[pointA[0]][pointA[1]])*100)
 
     return heu
 
@@ -373,7 +373,7 @@ def a_star_s3(Coord1,Coord2,Matrix,fireMap):
 
             inSet = next in pq.queue
             for open_node in pq.queue:
-                if open_node == next and ():
+                if open_node == next:
                     if curr.distance + 1 < open_node.distance:
                         open_node.distance = curr.distance if curr.parent else 0 + 1
                         open_node.parent = curr
@@ -671,13 +671,13 @@ def a_star(Coord1, Coord2, Matrix):
                 print(pq.queue[0].priority)
             '''
             for open_node in pq.queue:
-                print(next,end = ' ')
-                print(open_node)
-                if next == open_node and next.distance >= open_node.distance:
-                  
-                    break
+                if open_node == next:
+                    if curr.distance + 1 < open_node.distance:
+                        open_node.distance = curr.distance if curr.parent else 0 + 1
+                        open_node.parent = curr
+                        break
             else:
-               pq.put(next)
+                pq.put(next)
             
             
             
@@ -714,7 +714,7 @@ def startFire(matrix):
 #print(DFSsearch(a, b, testMatrix))
 #print(dfsTestMatrix)
 
-
+'''
 arr = [['S','0','0','0','0','0','0','0','0','0'],
  ['0','0','0','0','0','0','0','0','0','0'],
  ['0','!','0','0','0','0','0','0','0','0'],
@@ -741,6 +741,7 @@ test_arr = np.array(test_arr)
 testMatrix = createMatrix(10,0)
 a = (0,0)
 b = (9,9)
+'''
 '''
 test123 = deepcopy(testMatrix)
 fireMap = buildFireMap(test123)
@@ -781,7 +782,7 @@ if x:
         s3_astar = s3_astar.parent
 
     prime_path = stack[::-1] 
-    print(strat4_graph(prime_path,test_arr,.2))
+    print(strat4_graph(prime_path,strat3matrix,.2))
 else:
     print("No path")
 
@@ -867,7 +868,7 @@ if x:
 
  
 '''
-'''
+
 #-- DFS success rate vs obsticle density (p)
 obsticle_density= np.linspace(.1,1,10)
 dfs_success_counter = 0
@@ -884,10 +885,10 @@ for p in obsticle_density:
 
     success_tracker.append(dfs_success_counter / float(100))
     dfs_success_counter = 0
-
+'''
 print(obsticle_density)
 print(success_tracker)
-
+'''
 plt.plot(obsticle_density,success_tracker)
 
 #--- BFS - A star nodes explored vs obsticle density (p)---
@@ -902,15 +903,16 @@ for p in obsticle_density:
         bfsNode = BFS(a,b,loop_matrix)
         a_star_node = a_star(a,b,loop_matrix)
         
-    bfs_avg_nodes_explored = float((sum(bfs_nodes_explored) / len(bfs_nodes_explored)))
-    a_star_avg_nodes = (sum(a_star_avg) / len(a_star_avg))
+    bfs_avg_nodes_explored = float((float(sum(bfs_nodes_explored)) / float(len(bfs_nodes_explored))))
+    a_star_avg_nodes = float((float(sum(a_star_avg))/ float(len(a_star_avg))))
     diff.append(bfs_avg_nodes_explored - a_star_avg_nodes)
     bfs_nodes_explored = []
     a_star_avg = []
     diff = [round(num, 2) for num in diff]
 
+print(diff)
+print(obsticle_density)
 '''
-
 #--- Strategy 1  and  Strategy 2 and Strategy 3 success rate vs. fire intensity (q) with stable obstacle density (p = .3)---
 fire_rate = np.linspace(.1,1,10)
 success_strat1 = []
@@ -921,6 +923,7 @@ s1_count = 0
 s2_count = 0
 s3_count = 0
 s4_count = 0
+wack_counter = 0
 path_counter = 0
 for qf in fire_rate:
     while path_counter < 100:
@@ -931,6 +934,7 @@ for qf in fire_rate:
         a = (0,0)
         b = (N,N)
         bfsNode = BFS(a,b,strat1)
+        tNode = bfsNode
         stack = []
         if (bfsNode is not None):
             while bfsNode:
@@ -942,8 +946,7 @@ for qf in fire_rate:
                 prime_path.append(stack.pop())
 
            
-            fireMap = buildFireMap(strat3,qf)
-            astar_node = a_star_s3(a,b,strat3,fireMap)  
+          
             strat1Matrix = startFire(strat1)
             strat2Matrix = deepcopy(strat1Matrix)
             strat3Matrix = deepcopy(strat1Matrix)
@@ -951,7 +954,8 @@ for qf in fire_rate:
             strat_1_result = strat1_graph(prime_path,strat1Matrix,qf)
             strat_2_result = strat2_graph(prime_path,strat2Matrix,qf)  
 
-           
+            fireMap = buildFireMap(strat3,qf)
+            astar_node = a_star_s3(a,b,strat3,fireMap)  
             if strat_1_result:
                 s1_count += 1
             
@@ -961,7 +965,7 @@ for qf in fire_rate:
           
             stack = []
             
-
+            
             while astar_node:
                 stack.append((astar_node.x,astar_node.y))
                 astar_node = astar_node.parent
@@ -995,7 +999,8 @@ success_strat4 = [round(num,3) for num in success_strat4]
 print(success_strat1)
 print(success_strat2)
 print(success_strat4)
+print(wack_counter)
 print(fire_rate)
 
-
+'''
 
